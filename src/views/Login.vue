@@ -128,7 +128,7 @@
 </template>
 
 <script>
-import { loginService } from "@/services/authService";
+import { loginService } from "@/services/apiService";
 import moment from "moment";
 import toastMixin from "../mixins/toastMixin";
 import Landing from "../components/Landing";

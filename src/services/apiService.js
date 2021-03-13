@@ -62,6 +62,20 @@ export function getInfluencers(page = "?page=1") {
     });
 }
 
+export function getPosts(page = 1) {
+  let config = axiosConfig();
+  config.params = { page: 1 };
+
+  return http
+    .get(`https://randomlyapi.symphony.is/api/posts/`, config)
+    .then(response => {
+      return response.data;
+    })
+    .catch(e => {
+      return handleHttpError(e);
+    });
+}
+
 export function followInfluencer(id) {
   const data = {
     user: id
@@ -69,6 +83,24 @@ export function followInfluencer(id) {
   return http
     .post(
       "https://randomlyapi.symphony.is/api/followings/",
+      data,
+      axiosConfig()
+    )
+    .then(response => {
+      return response.data;
+    })
+    .catch(e => {
+      return handleHttpError(e);
+    });
+}
+
+export function likePost(id) {
+  const data = {
+    post: id
+  };
+  return http
+    .post(
+      "https://randomlyapi.symphony.is/api/post-likes/",
       data,
       axiosConfig()
     )

@@ -44,7 +44,7 @@
           tabindex="0"
         >
           <div
-            v-if="!user.isInfluencer && user.numberOfFollowings < 3"
+            v-if="showInfluencers"
             class="absolute inset-0 py-6 px-4 sm:px-6 lg:px-8"
           >
             <div class="flex m-2 w-full justify-between">
@@ -122,10 +122,92 @@
                   </div>
                 </li>
               </ul>
+              <div
+                v-if="!isNextDisabled"
+                class="flex w-full justify-center items-center"
+              >
+                <button
+                  :disabled="isNextDisabled"
+                  @click="loadNext"
+                  :class="{ disabledButton: isNextDisabled }"
+                  class="py-1 px-3 rounded-lg border bg-purple-400 border-purple-300 text-white mt-6 mb-2 mx-auto flex overflow-hidden"
+                >
+                  <div v-if="loading" class="spinner" style="font-size:16px">
+                    <div class="head"></div>
+                  </div>
+                  <span v-else>
+                    Load More
+                  </span>
+                </button>
+                <button
+                  @click="location.reload()"
+                  class="py-1 px-3 rounded-lg border bg-blue-400 border-blue-300 text-white mt-6 mb-2 mx-auto flex overflow-hidden"
+                  v-if="influencersToFollow.length >= 3"
+                >
+                  To News Feed
+                </button>
+              </div>
             </div>
           </div>
           <div v-else class="absolute inset-0 py-6 px-4 sm:px-6 lg:px-8">
-            <div class="bg-gray-200 p-3 rounded-lg"></div>
+            <div class="bg-gray-200 p-3 rounded-lg">
+              <div
+                v-for="post in posts"
+                :key="post.id"
+                class="flex flex-col max-w-3xl bg-white p-4 border-b-2 mx-auto"
+              >
+                <!-- {{ posts[index] }} -->
+                <div class="flex mb-4 relative">
+                  <img
+                    class="w-16 h-16 flex-shrink-0 bg-black rounded-full"
+                    :src="post.user.profileImage"
+                    alt=""
+                  />
+                  <div class="flex justify-between flex-col w-full">
+                    <div>
+                      <span class="text-gray-600 ml-3">
+                        {{ post.user.firstName + " " + post.user.lastName }}
+                      </span>
+                      <span class="text-gray-400 text-sm ml-1">
+                        @{{ post.user.username }}
+                      </span>
+                    </div>
+                    <div class="pl-3">
+                      {{ post.text }}
+                    </div>
+                  </div>
+                  <div
+                    class="text-gray-600 time text-sm absolute right-0 top-0 pt-2 px-4"
+                  >
+                    {{ moment(post.createdOn, "DD/MM/YYYY HH:mm").fromNow() }}
+                  </div>
+                </div>
+                <div class="flex flex-col pl-16">
+                  <img
+                    v-if="post.image"
+                    :src="post.image"
+                    class="rounded-lg"
+                    alt=""
+                  />
+                  <div
+                    @click="likePost(post.id)"
+                    class="flex items-center cursor-pointer"
+                  >
+                    <img
+                      class="h-5 mt-2 w-auto"
+                      :src="require(`../assets/img/like.png`)"
+                      alt="Like"
+                    />
+                    <span
+                      class="font-bold pt-2 ml-2 text-gray-700"
+                      :class="{ 'text-blue-500': post.isLikedByUser }"
+                    >
+                      {{ post.likesCount }}
+                    </span>
+                  </div>
+                </div>
+              </div>
+            </div>
           </div>
         </main>
         <aside
@@ -144,8 +226,10 @@
 import {
   logoutService,
   getInfluencers,
-  followInfluencer
-} from "@/services/authService";
+  followInfluencer,
+  getPosts,
+  likePost
+} from "@/services/apiService";
 import Navigation from "../components/Navigation";
 import toastMixin from "../mixins/toastMixin";
 
@@ -164,7 +248,9 @@ export default {
       influencers: [],
       previous: "",
       next: "",
-      influencersToFollow: []
+      influencersToFollow: [],
+      loading: false,
+      posts: []
     };
   },
 
@@ -193,8 +279,16 @@ export default {
     mapData() {
       this.user = JSON.parse(localStorage.getItem("user"));
 
-      if (!this.user.hasSelectedInfluencers && !this.user.isInfluencer) {
+      if (
+        !this.user.hasSelectedInfluencers &&
+        !this.user.isInfluencer &&
+        this.user.numberOfFollowings.length >= 3
+      ) {
         this.getInfluencers();
+        this.showInfluencers = true;
+      } else {
+        this.getPosts();
+        this.showInfluencers = false;
       }
     },
 
@@ -210,6 +304,36 @@ export default {
       if (response.error) return this.$displayServerResponse(response);
 
       this.$displayServerResponse(response);
+
+      // Response would usually be handled by the server, but it doesnt exist so creating a custom one.
+      const message = { success: "You are now following this influencer!" };
+
+      this.$displayServerResponse(message);
+    },
+
+    async likePost(id) {
+      const response = await likePost(id);
+
+      if (response.error) return this.$displayServerResponse(response);
+
+      // Response would usually be handled by the server, but it doesnt exist so creating a custom one.
+      const message = { success: "Success!" };
+
+      this.$displayServerResponse(message);
+
+      this.getPosts();
+    },
+
+    async getPosts() {
+      const response = await getPosts();
+
+      if (response.error) {
+        return this.$displayServerResponse(response);
+      }
+
+      this.$displayServerResponse(response);
+
+      this.posts = response.results;
     },
 
     async getInfluencers(page) {
@@ -221,9 +345,16 @@ export default {
         user: this.user.id
       };
 
+      this.loading = true;
+
       const response = await getInfluencers(page);
 
-      if (response.error) return this.$displayServerResponse(response);
+      if (response.error) {
+        this.$nextTick(() => {
+          this.loading = false;
+        }, 1000);
+        return this.$displayServerResponse(response);
+      }
 
       this.$displayServerResponse(response);
 
@@ -240,6 +371,9 @@ export default {
       } else {
         this.next = "";
       }
+      this.$nextTick(() => {
+        this.loading = false;
+      }, 1000);
     },
 
     loadNext() {
@@ -273,5 +407,33 @@ export default {
   color: rgb(112, 111, 111) !important;
   background: #ccc;
   cursor: not-allowed;
+}
+
+.spinner {
+  width: 30px;
+  height: 30px;
+  border-top: 1em solid #d5fff7;
+  border-right: 1em solid transparent;
+  animation: spinner 0.4s linear infinite;
+  border-radius: 50%;
+  margin: auto;
+}
+
+.head {
+  width: 1em;
+  height: 1em;
+  border-radius: 50%;
+  margin-left: 8.5em;
+  margin-top: 0.5em;
+  background-color: #d5fff7;
+}
+@keyframes spinner {
+  to {
+    transform: rotate(360deg);
+  }
+}
+
+.time {
+  white-space: nowrap;
 }
 </style>

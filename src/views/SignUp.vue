@@ -185,7 +185,7 @@
 </template>
 
 <script>
-import { registerService } from "@/services/authService";
+import { registerService } from "@/services/apiService";
 import moment from "moment";
 import toastMixin from "../mixins/toastMixin";
 import Landing from "../components/Landing";
