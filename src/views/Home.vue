@@ -250,7 +250,8 @@ export default {
       next: "",
       influencersToFollow: [],
       loading: false,
-      posts: []
+      posts: [],
+      showInfluencers: true
     };
   },
 
@@ -279,11 +280,7 @@ export default {
     mapData() {
       this.user = JSON.parse(localStorage.getItem("user"));
 
-      if (
-        !this.user.hasSelectedInfluencers &&
-        !this.user.isInfluencer &&
-        this.user.numberOfFollowings.length >= 3
-      ) {
+      if (!this.user.isInfluencer && this.user.numberOfFollowings.length < 3) {
         this.getInfluencers();
         this.showInfluencers = true;
       } else {
