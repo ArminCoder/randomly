@@ -1,6 +1,14 @@
 import http from "./instance";
 import { handleHttpError } from "./httpHelpers";
 
+function getAccessToken() {
+  return localStorage.getItem("token");
+}
+
+function axiosConfig() {
+  return { headers: { Authorization: `token ${getAccessToken()}` } };
+}
+
 export function loginService(data) {
   return http
     .post("https://randomlyapi.symphony.is/api/auth/login/", data, {
@@ -27,7 +35,11 @@ export function registerService(data) {
 
 export function logoutService() {
   return http
-    .post("/auth/logout", null, { skipAuthRefresh: true })
+    .post(
+      "https://randomlyapi.symphony.is/api/auth/logout/",
+      null,
+      axiosConfig()
+    )
     .then(response => {
       return response.data;
     })
@@ -36,9 +48,30 @@ export function logoutService() {
     });
 }
 
-export function getUserDataService() {
+export function getInfluencers(page = "?page=1") {
   return http
-    .get("/auth/me")
+    .get(
+      `https://randomlyapi.symphony.is/api/influencer/${page}`,
+      axiosConfig()
+    )
+    .then(response => {
+      return response.data;
+    })
+    .catch(e => {
+      return handleHttpError(e);
+    });
+}
+
+export function followInfluencer(id) {
+  const data = {
+    user: id
+  };
+  return http
+    .post(
+      "https://randomlyapi.symphony.is/api/followings/",
+      data,
+      axiosConfig()
+    )
     .then(response => {
       return response.data;
     })

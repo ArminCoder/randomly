@@ -24,8 +24,15 @@
           <div
             class="mt-3 sm:mt-8 border-t-4 border-purple-400 py-3 rounded px-4 bg-gray-200"
           >
-            <div class="border-b text-center text-gray-600 py-6">
-              <span>Tadaaaaa!</span>
+            <div v-if="role" class="border-b text-center text-gray-600 py-6">
+              <div class="flex align-center justify-center">
+                <span>Tadaaaaa!</span>
+                <img
+                  class="w-6 h-6 ml-2 -mt-1"
+                  :src="require('../assets/img/party.png')"
+                  alt=""
+                />
+              </div>
               <br />
               <span
                 >Your role is
@@ -131,7 +138,7 @@ export default {
   name: "SignUp",
   data() {
     return {
-      role: "Influencer",
+      role: "",
       user: {},
       isOpen: false
     };
@@ -152,6 +159,8 @@ export default {
 
   methods: {
     async submit() {
+      if (this.disabled) return;
+
       this.isOpen = true;
       const response = await loginService(this.user);
 
@@ -170,6 +179,14 @@ export default {
         } else {
           this.role = "Regular";
         }
+
+        localStorage.setItem("user", JSON.stringify(response.user));
+
+        // localStorage.setItem(
+        //   "hasSelectedInfluencers",
+        //   response.user.hasSelectedInfluencers
+        // );
+        // localStorage.setItem("isInfluencer", response.user.isInfluencer);
       }
 
       // Response does not have a `success`, creating a custom one (because my toast notifications required a response.success)
@@ -177,10 +194,11 @@ export default {
 
       this.$displayServerResponse(message);
       this.closeModal();
+      this.user = {};
 
       setTimeout(() => {
         this.$router.push({ name: "homepage" });
-      }, 1000);
+      }, 3000);
     },
 
     closeModal() {
