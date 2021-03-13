@@ -3,7 +3,9 @@ import { handleHttpError } from "./httpHelpers";
 
 export function loginService(data) {
   return http
-    .post("/auth/login", data, { skipAuthRefresh: true })
+    .post("https://randomlyapi.symphony.is/api/auth/login/", data, {
+      skipAuthRefresh: true
+    })
     .then(response => {
       return response.data;
     })

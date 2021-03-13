@@ -24,85 +24,40 @@
           <div
             class="mt-3 sm:mt-8 border-t-4 border-purple-400 py-3 rounded px-4 bg-gray-200"
           >
-            <div>
+            <div class="border-b text-center text-gray-600 py-6">
+              <span>Tadaaaaa!</span>
+              <br />
+              <span
+                >Your role is
+                <span class="text-purple-600 font-bold"
+                  >{{ role }} !</span
+                ></span
+              >
+            </div>
+
+            <div class="pt-4">
               <div>
                 <p class="text-lg font-medium text-gray-700 text-center">
-                  Create an account
+                  Sign In
                 </p>
               </div>
             </div>
 
             <div class="mt-6">
               <form action="#" method="POST" @submit.prevent class="space-y-6">
-                <div class="flex">
-                  <div class="mr-1">
-                    <label
-                      for="email"
-                      class="block text-sm font-medium text-gray-700"
-                    >
-                      First Name
-                    </label>
-                    <div class="mt-1">
-                      <input
-                        v-model="user.firstName"
-                        name="firstName"
-                        type="text"
-                        placeholder="First Name"
-                        required
-                        class="appearance-none block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm placeholder-gray-400 focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm"
-                      />
-                    </div>
-                  </div>
-                  <div class="ml-1">
-                    <label
-                      for="email"
-                      class="block text-sm font-medium text-gray-700"
-                    >
-                      Last Name
-                    </label>
-                    <div class="mt-1">
-                      <input
-                        v-model="user.lastName"
-                        name="lastName"
-                        type="text"
-                        required
-                        placeholder="Last Name"
-                        class="appearance-none block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm placeholder-gray-400 focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm"
-                      />
-                    </div>
-                  </div>
-                </div>
                 <div>
                   <label
                     for="email"
                     class="block text-sm font-medium text-gray-700"
                   >
-                    Email
+                    Username or Email Address
                   </label>
                   <div class="mt-1">
                     <input
                       name="email"
-                      type="email"
-                      v-model="user.email"
-                      placeholder="Email Address"
-                      required
-                      class="appearance-none block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm placeholder-gray-400 focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm"
-                    />
-                  </div>
-                </div>
-
-                <div class="space-y-1">
-                  <label
-                    for="username"
-                    class="block text-sm font-medium text-gray-700"
-                  >
-                    Username
-                  </label>
-                  <div class="mt-1">
-                    <input
-                      name="username"
-                      v-model="user.username"
                       type="text"
+                      v-model="user.username"
+                      placeholder="Username or Email Address"
                       required
                       class="appearance-none block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm placeholder-gray-400 focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm"
                     />
@@ -128,25 +83,6 @@
                     />
                   </div>
                 </div>
-
-                <div class="space-y-1">
-                  <label
-                    for="password"
-                    class="block text-sm font-medium text-gray-700"
-                  >
-                    Date of Birth
-                  </label>
-                  <div class="mt-1">
-                    <input
-                      name="dateOfBirth"
-                      v-model="user.dateOfBirth"
-                      placeholder="Date of Birth"
-                      type="date"
-                      required
-                      class="appearance-none block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm placeholder-gray-400 focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm"
-                    />
-                  </div>
-                </div>
               </form>
               <div class="mt-4">
                 <button
@@ -155,17 +91,17 @@
                   @click="submit"
                   class="w-full flex justify-center py-2 px-4 border border-transparent rounded-md shadow-sm text-sm font-medium text-white bg-purple-600 hover:bg-purple-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-purple-500"
                 >
-                  Get Started
+                  Sign In
                 </button>
               </div>
               <div
                 class="mt-4 border-t-2 border-gray-300 pt-3 text-center text-gray-700"
               >
-                <span>Already have an account?</span>
+                <span>Don't have an account?</span>
                 <a
                   class="ml-1 text-purple-600 hover:text-purple-400 font-bold"
-                  href="/login"
-                  >Sign In</a
+                  href="/register"
+                  >Sign Up</a
                 >
               </div>
             </div>
@@ -175,7 +111,7 @@
     </div>
     <modal :open="isOpen">
       <div class="mt-8 text-gray-100 text-xl truncate">
-        Creating your account...
+        Loggin In...
       </div>
       <div class="spinner" style="font-size:16px">
         <div class="head"></div>
@@ -185,7 +121,7 @@
 </template>
 
 <script>
-import { registerService } from "@/services/authService";
+import { loginService } from "@/services/authService";
 import moment from "moment";
 import toastMixin from "../mixins/toastMixin";
 import Landing from "../components/Landing";
@@ -195,6 +131,7 @@ export default {
   name: "SignUp",
   data() {
     return {
+      role: "Influencer",
       user: {},
       isOpen: false
     };
@@ -209,41 +146,40 @@ export default {
 
   computed: {
     disabled() {
-      return (
-        !this.user.firstName ||
-        !this.user.lastName ||
-        !this.user.email ||
-        !this.user.password ||
-        !this.user.username ||
-        !this.user.dateOfBirth
-      );
+      return !this.user.username || !this.user.password;
     }
   },
 
   methods: {
     async submit() {
-      let data = this.user;
-
-      if (data.dateOfBirth) {
-        data.dateOfBirth = moment(String(data.dateOfBirth)).format(
-          "DD/MM/YYYY"
-        );
-      }
-
       this.isOpen = true;
-
-      const response = await registerService(data);
+      const response = await loginService(this.user);
 
       if (response.error) {
         this.closeModal();
         return this.$displayServerResponse(response);
       }
 
-      this.$displayServerResponse(response);
+      if (response.token) {
+        localStorage.setItem("token", response.token);
+      }
+
+      if (response.user) {
+        if (response.user.isInfluencer) {
+          this.role = "Influencer";
+        } else {
+          this.role = "Regular";
+        }
+      }
+
+      // Response does not have a `success`, creating a custom one (because my toast notifications required a response.success)
+      const message = { success: "Successfully Logged In!" };
+
+      this.$displayServerResponse(message);
       this.closeModal();
 
       setTimeout(() => {
-        this.$router.push({ name: "login" });
+        this.$router.push({ name: "homepage" });
       }, 1000);
     },
 
