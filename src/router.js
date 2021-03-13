@@ -1,29 +1,44 @@
-import Vue from 'vue'
-import Router from 'vue-router'
-import Home from './views/Home.vue'
-import DropdownExample from './views/DropdownExample.vue'
-import ModalExample from './views/ModalExample.vue'
+import VueRouter from "vue-router";
+import rules from "./rules";
 
-Vue.use(Router)
+// Views
+const SignUp = () => import("@/views/SignUp");
+const Login = () => import("@/views/Login");
+const Homepage = () => import("@/views/Home");
 
-export default new Router({
-  mode: 'history',
-  base: process.env.BASE_URL,
-  routes: [
-    {
-      path: '/',
-      name: 'home',
-      component: Home
-    },
-    {
-      path: '/dropdown',
-      name: 'dropdown',
-      component: DropdownExample,
-    },
-    {
-      path: '/modal',
-      name: 'modal',
-      component: ModalExample,
-    },
-  ]
-})
+export default {
+  getRoutes() {
+    let router = new VueRouter({
+      mode: "history",
+      routes: [
+        {
+          path: "/dashboard",
+          name: "homepage",
+          component: Homepage,
+          beforeEnter: rules.isLoggedIn
+        },
+        {
+          path: "/login",
+          name: "login",
+          component: Login,
+          beforeEnter: rules.isGuest
+        },
+        {
+          path: "/register",
+          name: "register",
+          component: SignUp,
+          beforeEnter: rules.isGuest
+        },
+        {
+          path: "*",
+          redirect: "/login"
+        }
+      ]
+    });
+    router.beforeEach((to, from, next) => {
+      next();
+    });
+
+    return router;
+  }
+};

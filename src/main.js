@@ -1,13 +1,19 @@
-import Vue from 'vue'
-import PortalVue from 'portal-vue'
-import App from './App.vue'
-import router from './router'
+import Vue from "vue";
+import bootstrap from "./bootstrap";
 
-Vue.config.productionTip = false
+import App from "./App.vue";
 
-Vue.use(PortalVue)
+window.rootUrl = process.env.MIX_APP_URL;
+
+Vue.config.productionTip = false;
+
+//init routes
+const router = bootstrap.initRouter();
+
+//Misc
+bootstrap.initToast();
 
 new Vue({
   router,
   render: h => h(App)
-}).$mount('#app')
+}).$mount("#app");
