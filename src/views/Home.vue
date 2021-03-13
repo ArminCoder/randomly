@@ -140,7 +140,7 @@
                   </span>
                 </button>
                 <button
-                  @click="location.reload()"
+                  @click="getPosts()"
                   class="py-1 px-3 rounded-lg border bg-blue-400 border-blue-300 text-white mt-6 mb-2 mx-auto flex overflow-hidden"
                   v-if="influencersToFollow.length >= 3"
                 >
@@ -251,7 +251,7 @@ export default {
       influencersToFollow: [],
       loading: false,
       posts: [],
-      showInfluencers: true
+      showInfluencers: false
     };
   },
 
@@ -280,12 +280,10 @@ export default {
     mapData() {
       this.user = JSON.parse(localStorage.getItem("user"));
 
-      if (!this.user.isInfluencer && this.user.numberOfFollowings.length < 3) {
+      if (!this.user.isInfluencer && this.user.numberOfFollowings < 3) {
         this.getInfluencers();
-        this.showInfluencers = true;
       } else {
         this.getPosts();
-        this.showInfluencers = false;
       }
     },
 
@@ -331,6 +329,7 @@ export default {
       this.$displayServerResponse(response);
 
       this.posts = response.results;
+      this.showInfluencers = false;
     },
 
     async getInfluencers(page) {
@@ -371,6 +370,8 @@ export default {
       this.$nextTick(() => {
         this.loading = false;
       }, 1000);
+
+      this.showInfluencers = true;
     },
 
     loadNext() {
